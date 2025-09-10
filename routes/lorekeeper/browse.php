@@ -57,11 +57,13 @@ Route::group(['prefix' => 'user', 'namespace' => 'Users'], function () {
     Route::get('{name}/myos', 'UserController@getUserMyoSlots');
     Route::get('{name}/inventory', 'UserController@getUserInventory');
     Route::get('{name}/bank', 'UserController@getUserBank');
-
+    Route::get('{name}/borders', 'UserController@getUserBorders');
+    
     Route::get('{name}/currency-logs', 'UserController@getUserCurrencyLogs');
     Route::get('{name}/item-logs', 'UserController@getUserItemLogs');
     Route::get('{name}/ownership', 'UserController@getUserOwnershipLogs');
     Route::get('{name}/submissions', 'UserController@getUserSubmissions');
+    Route::get('{name}/border-logs', 'UserController@getUserBorderLogs');
 });
 
 /**************************************************************************************************
@@ -111,6 +113,10 @@ Route::group(['prefix' => 'world'], function () {
     Route::get('trait-categories', 'WorldController@getFeatureCategories');
     Route::get('traits', 'WorldController@getFeatures');
     Route::get('character-categories', 'WorldController@getCharacterCategories');
+    Route::get('border-categories', 'WorldController@getBorderCategories');
+    Route::get('borders', 'WorldController@getBorders');
+    Route::get('borders/{id}', 'WorldController@getBorder');
+    Route::get('check-border', 'WorldController@getBorderPreview');
 });
 
 Route::group(['prefix' => 'prompts'], function () {

@@ -2,19 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Border\Border;
+use App\Models\Border\BorderCategory;
 use App\Models\Character\CharacterCategory;
 use App\Models\Currency\Currency;
 use App\Models\Feature\Feature;
 use App\Models\Feature\FeatureCategory;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
+use App\Models\Prompt\Prompt;
+use App\Models\Prompt\PromptCategory;
 use App\Models\Rarity;
 use App\Models\Shop\Shop;
+use App\Models\Shop\ShopStock;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Config;
 
 class WorldController extends Controller {
     /*
@@ -25,7 +31,7 @@ class WorldController extends Controller {
     | Displays information about the world, as entered in the admin panel.
     | Pages displayed by this controller form the site's encyclopedia.
     |
-    */
+     */
 
     /**
      * Shows the index page.
@@ -419,6 +425,119 @@ class WorldController extends Controller {
 
         return view('world.character_categories', [
             'categories' => $query->visible(Auth::check() ? Auth::user() : null)->orderBy('sort', 'DESC')->orderBy('id')->paginate(20)->appends($request->query()),
+        ]);
+    }
+
+    /**
+     * Shows the border categories page.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getBorderCategories(Request $request)
+    {
+        $query = BorderCategory::query();
+        $name = $request->get('name');
+        if ($name) {
+            $query->where('name', 'LIKE', '%' . $name . '%');
+        }
+
+        return view('world.border_categories', [
+            'categories' => $query->orderBy('sort', 'DESC')->paginate(20)->appends($request->query()),
+        ]);
+    }
+
+    /**
+     * Shows the borders page.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getBorders(Request $request)
+    {
+        $query = Border::base()->active(Auth::user() ?? null);
+        $data = $request->only(['border_category_id', 'name', 'sort', 'is_default', 'artist']);
+        if (isset($data['border_category_id']) && $data['border_category_id'] != 'none') {
+            $query->where('border_category_id', $data['border_category_id']);
+        }
+
+        if (isset($data['is_default']) && $data['is_default'] != 'none') {
+            $query->where('is_default', $data['is_default'])->where('admin_only', 0);
+        }
+
+        if (isset($data['name'])) {
+            $query->where('name', 'LIKE', '%' . $data['name'] . '%');
+        }
+
+        if (isset($data['artist']) && $data['artist'] != 'none') {
+            $query->where('artist_id', $data['artist']);
+        }
+
+        if (isset($data['sort'])) {
+            switch ($data['sort']) {
+                case 'alpha':
+                    $query->sortAlphabetical();
+                    break;
+                case 'alpha-reverse':
+                    $query->sortAlphabetical(true);
+                    break;
+                case 'category':
+                    $query->sortCategory();
+                    break;
+                case 'newest':
+                    $query->sortNewest();
+                    break;
+                case 'oldest':
+                    $query->sortOldest();
+                    break;
+            }
+        } else {
+            $query->sortCategory();
+        }
+
+        return view('world.borders', [
+            'borders' => $query->paginate(20)->appends($request->query()),
+            'categories' => ['none' => 'Any Category'] + BorderCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'is_default' => ['none' => 'Any Type', '0' => 'Unlockable', '1' => 'Default'],
+            'artists' => ['none' => 'Any Artist'] + User::whereIn('id', Border::whereNotNull('artist_id')->pluck('artist_id')->toArray())->pluck('name', 'id')->toArray(),
+        ]);
+    }
+
+    /**
+     * Shows an individual border's page.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getBorder($id)
+    {
+        $border = Border::base()->where('id', $id)->active()->first();
+        if (!$border) {
+            abort(404);
+        }
+
+        return view('world._border_page', [
+            'border' => $border,
+            'imageUrl' => $border->imageUrl,
+            'name' => $border->displayName,
+            'description' => $border->parsed_description,
+        ]);
+    }
+
+    public function getBorderPreview(Request $request)
+    {
+        $border = Border::find($request->input('border'));
+        $top = Border::find($request->input('top'));
+        $bottom = Border::find($request->input('bottom'));
+
+        if (!$border || !$top || !$bottom) {
+            return response('<hr class="w-75 d-none d-md-block"/>Select a valid combination to preview.');
+        }
+
+        return view('world._border_ajax', [
+            'top' => $top,
+            'bottom' => $bottom,
+            'border' => $border,
         ]);
     }
 }
