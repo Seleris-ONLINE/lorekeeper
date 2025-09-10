@@ -14,6 +14,7 @@ use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\User\User;
 use App\Models\User\UserCurrency;
+use App\Models\Shop\UserShop;
 use App\Models\User\UserUpdateLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -348,6 +349,23 @@ class UserController extends Controller {
             'user'       => $this->user,
             'characters' => true,
             'favorites'  => $this->user->characters->count() ? GallerySubmission::whereIn('id', $userFavorites)->whereIn('id', GalleryCharacter::whereIn('character_id', $userCharacters)->pluck('gallery_submission_id')->toArray())->visible(Auth::check() ? Auth::user() : null)->orderBy('created_at', 'DESC')->paginate(20)->appends($request->query()) : null,
+        ]);
+    }
+
+    /**
+     * Shows a user's shops.
+     *
+     * @param  string  $name
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getUserShops($name)
+    {
+        $shops = UserShop::visible()->where('user_id', $this->user->id);
+
+        return view('user.shops', [
+            'user' => $this->user,
+            'shops' => $shops->orderBy('sort', 'DESC')->get(),
+            'sublists' => Sublist::orderBy('sort', 'DESC')->get()
         ]);
     }
 }
