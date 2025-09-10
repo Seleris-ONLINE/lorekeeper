@@ -46,6 +46,9 @@
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{ url('comments/liked') }}">
                                 Liked Comments
+                             </a>
+                            <a class="dropdown-item" href="{{ url('collection') }}">
+                                Collections
                             </a>
                         </div>
                     </li>
