@@ -55,6 +55,9 @@
         <i class="fas fa-eye-slash"></i>
     @endif
     {!! $character->displayName !!}
+    @if ($character->profile->pronouns)
+        ({!! $character->profile->pronouns !!})
+    @endif
     @if (!$character->is_myo_slot)
         <i data-toggle="tooltip" title="Click to Copy the Character Code" id="copy" style="font-size: 14px; vertical-align: middle;" class="far fa-copy text-small"></i>
     @endif

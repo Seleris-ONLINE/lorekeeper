@@ -33,6 +33,10 @@
             {!! Form::label('name', 'Name') !!}
             {!! Form::text('name', $character->name, ['class' => 'form-control']) !!}
         </div>
+        <div class="form-group">
+            {!! Form::label('pronouns', 'Pronouns') !!}
+            {!! Form::text('pronouns', $character->profile->pronouns, ['class' => 'form-control']) !!}
+        </div>
         @if (config('lorekeeper.extensions.character_TH_profile_link'))
             <div class="form-group">
                 {!! Form::label('link', 'Profile Link') !!}

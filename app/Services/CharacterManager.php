@@ -1317,6 +1317,7 @@ class CharacterManager extends Service {
 
             $character->profile->text = $data['text'];
             $character->profile->parsed_text = parse($data['text']);
+            $character->profile->pronouns = $data['pronouns'];
             $character->profile->save();
 
             if ($isAdmin && isset($data['alert_user']) && $character->is_visible && $character->user_id) {
@@ -1825,6 +1826,7 @@ class CharacterManager extends Service {
             $character->profile->update([
                 'text'        => null,
                 'parsed_text' => null,
+                'pronouns'    => null,
             ]);
         }
 
