@@ -14,7 +14,7 @@ class AddPronounsToCharacterProfilesTable extends Migration
     public function up()
     {
         Schema::table('character_profiles', function (Blueprint $table) {
-            $table->text('pronouns', 50)->nullable()->default(null);
+            $table->string('pronouns')->nullable()->default(null);
         });
     }
 
